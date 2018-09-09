@@ -10,3 +10,6 @@ Experimenting with destructive file attacks in Go
 - For learning purposes only
 - Works well on Linux, Windows, and MacOS
 - I hope you have backups
+
+Read more about the philiosphy here:
+[GoRedDeath](http://lockboxx.blogspot.com/2018/09/goreddeath.html)
