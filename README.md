@@ -8,7 +8,5 @@ Experimenting with destructive file attacks in Go
 **! IT WILL PERMANENTLY ERASE FILES !**
 
 - For learning purposes only
-- Works well on Linux and Windows
-- Needs work on MacOS
-- Needs work on raw disk writes
+- Works well on Linux, Windows, and MacOS
 - I hope you have backups
